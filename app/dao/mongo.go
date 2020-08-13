@@ -4,8 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
-const DB
+
+var db *mongo.Database
 
 func InitMongo() {
 	// 设置客户端连接配置
@@ -25,5 +29,5 @@ func InitMongo() {
 	fmt.Println("Connected to MongoDB!")
 
 	// 指定获取要操作的数据集
-	DB = client.Database("pgdb")
+	db = client.Database("pgdb")
 }

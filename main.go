@@ -1,6 +1,9 @@
 package main
 
-import router "pgsrv/app/router"
+import (
+	dao "pgsrv/app/dao"
+	router "pgsrv/app/router"
+)
 
 func main() {
 	//初始化路由
