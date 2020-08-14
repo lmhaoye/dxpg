@@ -7,6 +7,7 @@ import (
 
 func main() {
 	//初始化路由
-	router.InitRouter()
 	dao.InitMongo()
+	router.InitRouter()
+
 }

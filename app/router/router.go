@@ -7,13 +7,14 @@ import (
 )
 
 func InitRouter() {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
 	router.NoRoute(service.NoHandler)
 	userGroup := router.Group("user")
 	{
-		userGroup.POST("/update", service.UpdateUser)
-		userGroup.GET("/get", service.GetUser)
+		userGroup.POST("/login", service.HandlerUserLogin)
+		userGroup.POST("/update", service.HandlerUserUpdate)
+		userGroup.GET("/get", service.HandlerUserGet)
 	}
 	branch := router.Group("building")
 	{
