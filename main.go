@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	dao "pgsrv/app/dao"
 	router "pgsrv/app/router"
 )
@@ -10,4 +11,11 @@ func main() {
 	dao.InitMongo()
 	router.InitRouter()
 
+}
+
+func CheckError(err error) {
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 }

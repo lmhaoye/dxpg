@@ -22,14 +22,14 @@ type Building struct {
 	Name string             `json:"name" bson:"name"`
 }
 
-func db() *mongo.Collection {
+func dbBuilding() *mongo.Collection {
 	return dao.Conn().Collection("building")
 }
 
 func dbSelectAll() []*Building {
 	var results []*Building
 	ctx := context.Background()
-	cur, err := db().Find(ctx, bson.D{})
+	cur, err := dbBuilding().Find(ctx, bson.D{})
 	if err != nil {
 		log.Fatal(err)
 	}
