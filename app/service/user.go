@@ -44,8 +44,9 @@ func HandlerUserGet(c *gin.Context) {
 
 func HandlerUserUpdate(c *gin.Context) {
 	body := &User{}
-	c.Bind(body)
+	c.ShouldBind(body)
 	log.Println(body)
+	saveUser(body)
 	c.JSON(200, define.ReturnDefault("login success"))
 }
 
@@ -67,18 +68,29 @@ func dbUser() *mongo.Collection {
 
 func saveUser(user *User) {
 	openid := user.OpenId
-	dbData := getByOpenid(openid)
-	if dbData != nil {
-		return
-	}
-
-	res, err := dbUser().InsertOne(nil, bson.M{"openid": openid})
+	var dbUserTemp User
+	err := dbUser().FindOneAndUpdate(nil, bson.M{"openid": openid}, bson.D{{"$set": bson.D{
+		{"nickName": user.NickName,
+			"gender":    user.Gender,
+			"city":      user.City,
+			"province":  user.Province,
+			"country":   user.Country,
+			"avatarUrl": user.AvatarUrl},
+	}}}).Decode(&dbUserTemp)
 	if err != nil {
-		log.Fatalln("save user error=%v", err)
+		//如果没有数据
+		if err == mongo.ErrNoDocuments {
+			res, err := dbUser().InsertOne(nil, bson.M{"openid": openid})
+			if err != nil {
+				log.Fatalln("save user error=%v", err)
+			}
+			id := res.InsertedID
+			log.Println("save user success id:%v", id)
+			return
+		}
+		log.Println(err)
 	}
-	id := res.InsertedID
-	log.Println("save user success id:%v", id)
-
+	return
 }
 
 func getByOpenid(openid string) *User {
