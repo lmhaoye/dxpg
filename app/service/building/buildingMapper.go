@@ -1,35 +1,29 @@
-package service
+package building
 
 import (
 	"context"
 	"log"
 	"pgsrv/app/dao"
-	"pgsrv/app/define"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func HandlerGetAll(c *gin.Context) {
-	ret := define.ReturnOk(dbSelectAll())
-	c.JSON(200, ret)
-}
-
+// Building 对象
 type Building struct {
 	ID   primitive.ObjectID `json:"id" bson:"_id"`
 	Name string             `json:"name" bson:"name"`
 }
 
-func dbBuilding() *mongo.Collection {
+func db() *mongo.Collection {
 	return dao.Conn().Collection("building")
 }
 
-func dbSelectAll() []*Building {
+func findAll() []*Building {
 	var results []*Building
 	ctx := context.Background()
-	cur, err := dbBuilding().Find(ctx, bson.D{})
+	cur, err := db().Find(ctx, bson.D{})
 	if err != nil {
 		log.Fatal(err)
 	}

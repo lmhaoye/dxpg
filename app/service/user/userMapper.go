@@ -1,58 +1,15 @@
-package service
+package user
 
 import (
-	"encoding/json"
 	"log"
 	"pgsrv/app/dao"
-	"pgsrv/app/define"
-	"pgsrv/app/wechat"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type LoginBody struct {
-	Code string `form:"code" binding:"required"`
-}
-
-func HandlerUserLogin(c *gin.Context) {
-	body := &LoginBody{}
-	c.Bind(body)
-	code := body.Code
-	rs := wechat.AuthCode2Session(code)
-	log.Println(rs)
-	var rsMap map[string]string
-	err := json.Unmarshal([]byte(rs), &rsMap)
-
-	if err != nil {
-		log.Fatalf("json error=%v", err)
-	}
-	openid := rsMap["openid"]
-	user := &User{
-		OpenID: openid,
-	}
-	saveUser(user)
-
-	c.JSON(200, define.ReturnOk(rsMap))
-}
-func HandlerUserGet(c *gin.Context) {
-	openid, _ := c.GetQuery("openid")
-	user := getByOpenid(openid)
-	log.Println(user)
-
-	c.JSON(200, define.ReturnDefault("login success"))
-}
-
-func HandlerUserUpdate(c *gin.Context) {
-	body := &User{}
-	c.ShouldBind(body)
-	log.Println(body)
-	saveUser(body)
-	c.JSON(200, define.ReturnDefault("login success"))
-}
-
+// User 用户数据
 type User struct {
 	ID        primitive.ObjectID `json:"id" bson:"_id"`
 	OpenID    string             `json:"openId" bson:"openId"`
@@ -65,14 +22,15 @@ type User struct {
 	UnionID   string             `json:"unionId" bson:"unionId"`
 }
 
-func dbUser() *mongo.Collection {
+func db() *mongo.Collection {
 	return dao.Conn().Collection("user")
 }
 
 func saveUser(user *User) {
 	openid := user.OpenID
 	var dbUserTemp User
-	err := dbUser().FindOneAndUpdate(nil, bson.M{"openid": openid}, bson.M{"$set": bson.M{
+	log.Println(bson.M{"openid": openid})
+	err := db().FindOneAndUpdate(nil, bson.M{"openid": openid}, bson.M{"$set": bson.M{
 		"nickName":  user.NickName,
 		"gender":    user.Gender,
 		"city":      user.City,
@@ -83,12 +41,12 @@ func saveUser(user *User) {
 	if err != nil {
 		//如果没有数据
 		if err == mongo.ErrNoDocuments {
-			res, err := dbUser().InsertOne(nil, bson.M{"openid": openid})
+			res, err := db().InsertOne(nil, bson.M{"openid": openid})
 			if err != nil {
-				log.Fatalln("save user error=%v", err)
+				log.Fatalf("save user error=%v", err)
 			}
 			id := res.InsertedID
-			log.Println("save user success id:%v", id)
+			log.Printf("save user success id:%v", id)
 			return
 		}
 		log.Println(err)
@@ -98,7 +56,7 @@ func saveUser(user *User) {
 
 func getByOpenid(openid string) *User {
 	var user User
-	err := dbUser().FindOne(nil, bson.M{"openid": openid}).Decode(&user)
+	err := db().FindOne(nil, bson.M{"openid": openid}).Decode(&user)
 	if err != nil {
 		log.Printf("decode error=%v", err)
 		return nil
