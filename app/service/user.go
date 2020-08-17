@@ -27,17 +27,20 @@ func HandlerUserLogin(c *gin.Context) {
 	err := json.Unmarshal([]byte(rs), &rsMap)
 
 	if err != nil {
-		log.Fatalln("json error=%v", err)
+		log.Fatalf("json error=%v", err)
 	}
 	openid := rsMap["openid"]
 	user := &User{
-		OpenId: openid,
+		OpenID: openid,
 	}
 	saveUser(user)
 
 	c.JSON(200, define.ReturnOk(rsMap))
 }
 func HandlerUserGet(c *gin.Context) {
+	openid, _ := c.GetQuery("openid")
+	user := getByOpenid(openid)
+	log.Println(user)
 
 	c.JSON(200, define.ReturnDefault("login success"))
 }
@@ -51,15 +54,15 @@ func HandlerUserUpdate(c *gin.Context) {
 }
 
 type User struct {
-	Id        primitive.ObjectID `json:"id" bson:"_id"`
-	OpenId    string             `json:"openId" bson:"openId"`
+	ID        primitive.ObjectID `json:"id" bson:"_id"`
+	OpenID    string             `json:"openId" bson:"openId"`
 	NickName  string             `json:"nickName" bson:"nickName"`
 	Gender    string             `json:"gender" bson:"gender"`
 	City      string             `json:"city" bson:"city"`
 	Province  string             `json:"province" bson:"province"`
 	Country   string             `json:"country" bson:"country"`
-	AvatarUrl string             `json:"avatarUrl" bson:"avatarUrl"`
-	UnionId   string             `json:"unionId" bson:"unionId"`
+	AvatarURL string             `json:"avatarUrl" bson:"avatarUrl"`
+	UnionID   string             `json:"unionId" bson:"unionId"`
 }
 
 func dbUser() *mongo.Collection {
@@ -67,16 +70,16 @@ func dbUser() *mongo.Collection {
 }
 
 func saveUser(user *User) {
-	openid := user.OpenId
+	openid := user.OpenID
 	var dbUserTemp User
-	err := dbUser().FindOneAndUpdate(nil, bson.M{"openid": openid}, bson.D{{"$set": bson.D{
-		{"nickName": user.NickName,
-			"gender":    user.Gender,
-			"city":      user.City,
-			"province":  user.Province,
-			"country":   user.Country,
-			"avatarUrl": user.AvatarUrl},
-	}}}).Decode(&dbUserTemp)
+	err := dbUser().FindOneAndUpdate(nil, bson.M{"openid": openid}, bson.M{"$set": bson.M{
+		"nickName":  user.NickName,
+		"gender":    user.Gender,
+		"city":      user.City,
+		"province":  user.Province,
+		"country":   user.Country,
+		"avatarUrl": user.AvatarURL},
+	}).Decode(&dbUserTemp)
 	if err != nil {
 		//如果没有数据
 		if err == mongo.ErrNoDocuments {
