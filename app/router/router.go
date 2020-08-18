@@ -1,10 +1,12 @@
 package router
 
 import (
+	"fmt"
 	"pgsrv/app/service"
 	"pgsrv/app/service/building"
 	"pgsrv/app/service/faq"
 	"pgsrv/app/service/user"
+	"pgsrv/conf"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,5 +31,5 @@ func InitRouter() {
 		faqGroup.GET("/list", faq.HandlerPageFAQ)
 		faqGroup.POST("/submit", faq.HandlerSubmitFAQ)
 	}
-	router.Run()
+	router.Run(fmt.Sprintf(":%v", conf.Ser.Port))
 }

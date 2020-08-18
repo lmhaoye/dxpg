@@ -55,5 +55,10 @@ func HandlerUserUpdate(c *gin.Context) {
 	}
 	log.Println(body)
 	saveUser(body)
-	c.JSON(200, define.ReturnDefault("login success"))
+	c.JSON(200, define.ReturnDefault("update success"))
+}
+
+// HandlerUserSet 设置楼栋与棚改意见
+func HandlerUserSet(c *gin.Context) {
+	c.JSON(200, define.ReturnDefault("ok"))
 }
