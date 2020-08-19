@@ -58,7 +58,15 @@ func HandlerUserUpdate(c *gin.Context) {
 	c.JSON(200, define.ReturnDefault("update success"))
 }
 
+type UserSetBody struct {
+	BuildingID string `form:"buildingId" binding:"required"`
+}
+
 // HandlerUserSet 设置楼栋与棚改意见
 func HandlerUserSet(c *gin.Context) {
+	body := &UserSetBody{}
+	c.ShouldBind(body)
+	log.Printf("body:%v", body)
+
 	c.JSON(200, define.ReturnDefault("ok"))
 }

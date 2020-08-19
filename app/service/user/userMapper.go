@@ -3,6 +3,7 @@ package user
 import (
 	"log"
 	"pgsrv/app/dao"
+	"pgsrv/app/service/building"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,6 +21,7 @@ type User struct {
 	Country   string             `json:"country" bson:"country"`
 	AvatarURL string             `json:"avatarUrl" bson:"avatarUrl"`
 	UnionID   string             `json:"unionId" bson:"unionId"`
+	Building  *building.Building `json:"building" bson:"building"`
 }
 
 func db() *mongo.Collection {
@@ -62,4 +64,14 @@ func getByOpenid(openid string) *User {
 		return nil
 	}
 	return &user
+}
+
+func saveUserBuilding(openid string, buildingID string) {
+	bd := building.GetByID(buildingID)
+	_, err := db().UpdateOne(nil, bson.M{"openid": openid}, bson.M{
+		"building": *bd,
+	})
+	if err != nil {
+		log.Fatalf("save building error =%v", err)
+	}
 }

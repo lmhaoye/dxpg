@@ -43,3 +43,14 @@ func findAll() []*Building {
 	cur.Close(context.TODO())
 	return results
 }
+
+// getByID 查询单个id
+func GetByID(id string) *Building {
+	var result Building
+	objID, _ := primitive.ObjectIDFromHex(id)
+	err := db().FindOne(nil, bson.M{"_id": objID}).Decode(&result)
+	if err != nil {
+		return nil
+	}
+	return &result
+}
